@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EVA's Confidence Drive — LA DMV Practice Test</title>
+<style>
+  :root{
+    --pink:#ffb3c6; --lila:#c8a2ff; --gold:#ffd166;
+    --bg1:#1a1033; --bg2:#2a1a4a; --card:#fff6fb;
+    --ink:#2b1b3a; --ok:#2ecc71; --no:#e74c3c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+  body{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 20% 20%,var(--bg2),var(--bg1));
+    color:var(--ink);padding:16px;
+  }
+  .app{
+    width:100%;max-width:640px;background:var(--card);border-radius:24px;
+    padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative;
+    border:3px solid var(--pink);
+  }
+  h1,h2{color:#5b2a86;margin-bottom:10px;line-height:1.2;}
+  h1{font-size:1.6rem;} h2{font-size:1.25rem;}
+  p{margin-bottom:12px;line-height:1.5;}
+  .btn{
+    display:inline-block;padding:14px 20px;border-radius:16px;border:none;
+    background:linear-gradient(135deg,var(--lila),var(--pink));
+    color:#fff;font-weight:700;font-size:1rem;cursor:pointer;
+    box-shadow:0 6px 0 rgba(0,0,0,.15);transition:transform .1s,box-shadow .1s;
+    margin:6px 6px 6px 0;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.15);}
+  .btn.ghost{background:#fff;color:#5b2a86;border:2px solid var(--lila);}
+  .btn.gold{background:linear-gradient(135deg,var(--gold),#ffb347);color:#5b2a86;}
+  .screen{display:none;animation:fade .35s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .kid-bubble{
+    background:#fff0f6;border-left:6px solid var(--pink);border-radius:14px;
+    padding:12px 14px;margin:12px 0;font-style:italic;color:#7a3b5c;
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .kid-bubble::before{content:"🧒";font-size:1.4rem;}
+  .progress{height:10px;background:#eadcf5;border-radius:10px;overflow:hidden;margin:12px 0;}
+  .progress > div{height:100%;background:linear-gradient(90deg,var(--lila),var(--pink));width:0;transition:width .3s;}
+  .options{display:grid;gap:10px;margin-top:12px;}
+  .opt{
+    text-align:left;padding:14px;border-radius:14px;border:2px solid #e6d6f5;
+    background:#fff;cursor:pointer;font-size:1rem;color:var(--ink);
+    transition:all .15s;
+  }
+  .opt:hover{border-color:var(--lila);transform:translateX(4px);}
+  .opt.correct{background:#e7f9ee;border-color:var(--ok);}
+  .opt.wrong{background:#fdecea;border-color:var(--no);}
+  .opt[disabled]{cursor:default;transform:none;}
+  .feedback{margin-top:14px;padding:14px;border-radius:14px;background:#fff8e1;border-left:6px solid var(--gold);}
+  .score{font-size:3rem;font-weight:800;color:#5b2a86;text-align:center;}
+  .mute-btn{position:absolute;top:14px;right:14px;background:#fff;border:2px solid var(--lila);
+    border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:1.1rem;}
+  .breath{
+    width:160px;height:160px;border-radius:50%;margin:20px auto;
+    background:radial-gradient(circle,var(--pink),var(--lila));
+    box-shadow:0 0 40px var(--pink);animation:breathe 19s infinite;
+  }
+  @keyframes breathe{
+    0%,100%{transform:scale(.7)} 21%{transform:scale(1.1)}
+    58%{transform:scale(1.1)} 79%{transform:scale(.7)}
+  }
+  .center{text-align:center;}
+  small{color:#7a3b5c;}
+</style>
+</head>
+<body>
+<div class="app">
+  <button class="mute-btn" id="mute" title="Mute/Unmute voice">🔊</button>
+
+  <!-- SCREEN 1: WELCOME -->
+  <section class="screen active" id="s1">
+    <h1>Hi EVA! 👋</h1>
+    <p>You <strong>passed the theory</strong> — that's huge. Now let's build the confidence for the <strong>practical exam</strong>, one calm question at a time.</p>
+    <div class="kid-bubble">"You've got this, Mommy! I believe in you!"</div>
+    <div>
+      <button class="btn" onclick="go('s2')">Start My Journey</button>
+      <button class="btn ghost" onclick="kidSays('You\'ve got this, Mommy! I believe in you!')">🔊 Hear my kid</button>
+    </div>
+    <p style="margin-top:14px"><small>Based on California DMV & LA traffic rules · Works offline · Voice: Web Speech API</small></p>
+  </section>
+
+  <!-- SCREEN 2: MODE -->
+  <section class="screen" id="s2">
+    <h2>Choose your mode, Mami 💜</h2>
+    <p>You can change it anytime.</p>
+    <button class="btn" onclick="startTest('voice')">🎧 Voice Mode (kid reads + motivates)</button>
+    <button class="btn ghost" onclick="startTest('text')">📖 Text Mode (silent study)</button>
+    <button class="btn gold" onclick="startTest('mixed')">✨ Mixed (voice on feedback only)</button>
+  </section>
+
+  <!-- SCREEN 3: TEST -->
+  <section class="screen" id="s3">
+    <div class="progress"><div id="bar"></div></div>
+    <small id="qcount">Question 1 of 15</small>
+    <h2 id="qtext" style="margin-top:8px"></h2>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="fb" style="display:none"></div>
+    <div style="margin-top:14px" class="center">
+      <button class="btn" id="next" style="display:none" onclick="nextQ()">Next ➜</button>
+      <button class="btn ghost" onclick="repeatQ()">🔊 Repeat</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: RESULTS -->
+  <section class="screen" id="s4">
+    <h2 class="center" id="resultTitle">Great progress!</h2>
+    <div class="score" id="score">0%</div>
+    <div class="kid-bubble" id="kidEnd">"Mommy, you're amazing!"</div>
+    <p class="center" id="resultMsg"></p>
+    <div class="center">
+      <button class="btn" onclick="restart()">🔄 Retry</button>
+      <button class="btn ghost" onclick="go('s5')">🧘 Calm Drive</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 5: CALM DRIVE -->
+  <section class="screen" id="s5">
+    <h2>Calm Drive 🧘‍♀️</h2>
+    <p class="center">Breathe with the circle: <strong>inhale 4 · hold 7 · exhale 8</strong>.</p>
+    <div class="breath"></div>
+    <div class="kid-bubble" id="calmMsg">"Mami, breathe with me. You are safe. You are ready."</div>
+    <div class="center">
+      <button class="btn gold" onclick="kidSays('You are safe, Mami. You are ready. I love you!')">🔊 Hear affirmation</button>
+      <button class="btn ghost" onclick="go('s1')">⬅ Back home</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============ QUESTIONS (California DMV / LA rules) ============ */
+const QUESTIONS = [
+ {q:"At a four-way stop in Los Angeles, who goes first?",
+  a:["The biggest vehicle","The first vehicle to arrive and stop","The vehicle on the right always","Whoever honks first"],
+  c:1, exp:"California DMV: at a 4-way stop, the first vehicle to stop goes first. If two arrive at the same time, the one on the right has the right-of-way (CVC §21800)."},
+ {q:"What is the '3-second rule' used for in California?",
+  a:["Stopping at yellow lights","Keeping safe following distance","Turning at intersections","Parking near schools"],
+  c:1, exp:"Keep at least 3 seconds behind the car ahead. In rain or at night, increase to 4+ seconds (California Driver Handbook)."},
+ {q:"Before changing lanes on an LA freeway you must…",
+  a:["Honk, then move","Signal, check mirrors and blind spot, then move","Speed up and cut in","Only use mirrors"],
+  c:1, exp:"Signal, check mirrors, glance over your shoulder for the blind spot, then change lanes smoothly (CVC §22107)."},
+ {q:"In California parallel parking, your wheels should be within ___ of the curb.",
+  a:["6 inches","12 inches","18 inches","24 inches"],
+  c:2, exp:"The DMV requires your vehicle within 18 inches of the curb (CVC §22502). Practice slowly — you've got this."},
+ {q:"Speed limit in a California school zone when children are present:",
+  a:["15 mph","20 mph","25 mph","35 mph"],
+  c:2, exp:"25 mph in a school zone when children are present, unless posted otherwise (CVC §22352)."},
+ {q:"An emergency vehicle with lights and siren approaches. You should:",
+  a:["Speed up to get out of the way","Pull to the right and stop","Stop in your lane immediately","Ignore if you're late"],
+  c:1, exp:"Pull to the right edge and stop until it passes (CVC §21806). Stay calm — it's a simple, safe move."},
+ {q:"At a roundabout in California, who has the right-of-way?",
+  a:["Vehicles entering","Vehicles already in the circle","The fastest car","Bicycles only"],
+  c:1, exp:"Yield to traffic already in the roundabout. Enter to the right, go counter-clockwise (California Driver Handbook)."},
+ {q:"At a railroad crossing you should:",
+  a:["Speed up to cross quickly","Stop on the tracks if the gate is down","Never stop on the tracks and look both ways","Honk continuously"],
+  c:2, exp:"Never stop on tracks. Look and listen both ways before crossing (CVC §22452)."},
+ {q:"Legal BAC limit for California drivers 21 and older:",
+  a:["0.05%","0.08%","0.10%","0.00%"],
+  c:1, exp:"0.08% for adults 21+. Under 21: 0.01%. DUI is never worth it — plan a safe ride."},
+ {q:"In California, using a handheld phone while driving is:",
+  a:["Allowed for short calls","Allowed at red lights","Illegal — hands-free only","Allowed if you're careful"],
+  c:2, exp:"Handheld use is illegal. Use hands-free and voice controls only (CVC §23123)."},
+ {q:"When passing a bicyclist in LA, keep at least:",
+  a:["1 foot","2 feet","3 feet","5 feet"],
+  c:2, exp:"California's Three Feet for Safety Act requires at least 3 feet when passing (CVC §21760)."},
+ {q:"A solid yellow light means:",
+  a:["Speed up to beat the red","Stop if you can do so safely","Always slam the brakes","Honk and go"],
+  c:1, exp:"Yellow = stop if safe. Never accelerate. If you're already in the intersection, clear it carefully."},
+ {q:"When merging onto a freeway you should:",
+  a:["Stop at the end of the ramp","Match freeway speed and yield to freeway traffic","Force your way in","Merge at 25 mph"],
+  c:1, exp:"Use the ramp to match speed, signal, and yield to freeway traffic (California Driver Handbook)."},
+ {q:"Default speed limit on most residential LA streets (unless posted):",
+  a:["15 mph","20 mph","25 mph","35 mph"],
+  c:2, exp:"25 mph on most residential streets unless otherwise posted (CVC §22352)."},
+ {q:"When parking downhill on a hill in California, turn your wheels:",
+  a:["Toward the curb","Away from the curb","Straight","It doesn't matter"],
+  c:0, exp:"Downhill → turn wheels toward the curb. Uphill (with curb) → away from curb. Set the parking brake (CVC §22509)."}
+];
+
+/* ============ STATE ============ */
+let idx=0, score=0, mode='mixed', muted=false;
+const ENCOURAGE = [
+  "You've got this, Mommy! You're doing great!",
+  "Way to go, Mami! I'm so proud of you!",
+  "Mommy, you're almost ready to drive me to my classes!",
+  "Keep going, Mami! You're braver than you think!",
+  "Yes, Mommy! That's my mom!",
+  "Mami, I can't wait for you to take me to school!",
+  "You're amazing, Mommy! Don't give up!"
+];
+const SOFT = [
+  "It's okay, Mommy. Try again — I believe in you!",
+  "Mami, mistakes help us learn. You're still my hero!",
+  "Don't worry, Mommy. Next time you'll get it!",
+  "Take a breath, Mami. You're doing great!"
+];
+
+/* ============ VOICE ============ */
+function pickKidVoice(){
+  const voices = speechSynthesis.getVoices();
+  // Prefer an English female/child voice
+  return voices.find(v=>/en-US/i.test(v.lang) && /female|samantha|zira|child|kid/i.test(v.name))
+      || voices.find(v=>/en-US/i.test(v.lang))
+      || voices[0];
+}
+function speak(text, {pitch=1.6, rate=1.05}={}){
+  if(muted || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = pickKidVoice();
+  if(v) u.voice = v;
+  u.pitch = pitch; u.rate = rate; u.lang='en-US';
+  speechSynthesis.speak(u);
+}
+function kidSays(text){ speak(text,{pitch:1.7, rate:1.05}); }
+function narrator(text){ speak(text,{pitch:1.0, rate:1.0}); }
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = ()=>{};
+
+document.getElementById('mute').onclick = (e)=>{
+  muted=!muted; e.target.textContent = muted?'🔇':'🔊';
+  if(muted && 'speechSynthesis' in window) speechSynthesis.cancel();
+};
+
+/* ============ NAV ============ */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ TEST ============ */
+function startTest(m){
+  mode=m; idx=0; score=0; go('s3'); render();
+}
+function render(){
+  const Q = QUESTIONS[idx];
+  document.getElementById('qcount').textContent = `Question ${idx+1} of ${QUESTIONS.length}`;
+  document.getElementById('bar').style.width = `${(idx/QUESTIONS.length)*100}%`;
+  document.getElementById('qtext').textContent = Q.q;
+  const opts=document.getElementById('opts'); opts.innerHTML='';
+  Q.a.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=`${i+1}. ${t}`;
+    b.onclick=()=>answer(i,b);
+    opts.appendChild(b);
+  });
+  const fb=document.getElementById('fb'); fb.style.display='none'; fb.innerHTML='';
+  document.getElementById('next').style.display='none';
+  if(mode==='voice') narrator(Q.q);
+}
+function answer(i,btn){
+  const Q=QUESTIONS[idx];
+  const buttons=[...document.querySelectorAll('.opt')];
+  buttons.forEach((b,j)=>{
+    b.disabled=true;
+    if(j===Q.c) b.classList.add('correct');
+    if(j===i && i!==Q.c) b.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb');
+  const correct = i===Q.c;
+  if(correct) score++;
+  const praise = correct ? ENCOURAGE[Math.floor(Math.random()*ENCOURAGE.length)]
+                         : SOFT[Math.floor(Math.random()*SOFT.length)];
+  fb.style.display='block';
+  fb.innerHTML = `<strong>${correct?'✅ Correct!':'💡 Not quite — but that\\'s okay.'}</strong>
+                  <p style="margin-top:6px"><em>${Q.exp}</em></p>
+                  <div class="kid-bubble" style="margin-top:8px">"${praise}"</div>`;
+  if(mode!=='text') kidSays(praise);
+  document.getElementById('next').style.display='inline-block';
+  document.getElementById('bar').style.width = `${((idx+1)/QUESTIONS.length)*100}%`;
+}
+function nextQ(){
+  idx++;
+  if(idx>=QUESTIONS.length) return finish();
+  render();
+}
+function repeatQ(){
+  const Q=QUESTIONS[idx];
+  const txt = `${Q.q}. Options: ` + Q.a.map((o,i)=>`${i+1}: ${o}`).join('. ');
+  narrator(txt);
+}
+
+/* ============ RESULTS ============ */
+function finish(){
+  const pct = Math.round((score/QUESTIONS.length)*100);
+  document.getElementById('score').textContent = `${pct}%`;
+  let title, msg, kid;
+  if(pct>=90){title="EVA, you're READY! 🎉"; msg="You nailed it. Book that DMV practical — you've got this, Mami."; kid="Mommy, you did it! Let's go for a drive!";}
+  else if(pct>=70){title="Great progress, Mami! 💪"; msg="One more round and you'll be unstoppable. Review the misses and retry."; kid="So close, Mommy! One more try — I'm cheering for you!";}
+  else {title="Every expert was once a beginner 💜"; msg="Take a breath. Review the explanations, then try again. You are learning, not failing."; kid="It's okay, Mami. I still believe in you. Let's try again!";}
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('kidEnd').textContent = `"${kid}"`;
+  if(mode!=='text') kidSays(kid);
+  go('s4');
+}
+function restart(){ startTest(mode); }
+
+/* ============ KEYBOARD ============ */
+document.addEventListener('keydown',(e)=>{
+  if(!document.getElementById('s3').classList.contains('active')) return;
+  if(['1','2','3','4'].includes(e.key)){
+    const b=document.querySelectorAll('.opt')[+e.key-1];
+    if(b && !b.disabled) b.click();
+  }
+  if(e.key==='Enter'){
+    const n=document.getElementById('next');
+    if(n.style.display!=='none') n.click();
+  }
+});
+</script>
+</body>
+</html>
